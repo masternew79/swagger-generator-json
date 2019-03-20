@@ -1,12 +1,16 @@
 {
-  "name": "swagger-generator-json",
-  "version": "1.0.0",
-  "description": "Generate JSON document for swagger-ui-express",
-  "main": "index.js",
-  "keywords": [
-    "swagger",
-    "document"
-  ],
-  "author": "Tan Le",
-  "license": "ISC"
+    "name": "swagger-generator-json",
+    "version": "1.0.0",
+    "description": "Generate JSON document for swagger-ui-express",
+    "main": "index.js",
+    "keywords": [
+        "swagger",
+        "document"
+    ],
+    "author": "Tan Le",
+    "license": "ISC",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/masternew79/swagger-generator-json.git"
+    }
 }
