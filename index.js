@@ -378,8 +378,10 @@ class Operation {
                 arrParams.push(newParam)
             }
         }
-        const body = convertBodyFromArray(arrayBody)
-        arrParams.push(body)
+        if (arrayBody.length) {
+            const body = convertBodyFromArray(arrayBody)
+            arrParams.push(body)
+        }
         return arrParams
     }
 }
