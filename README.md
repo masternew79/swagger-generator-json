@@ -19,7 +19,8 @@ const documentsSearchUser = new API({
                 {
                     name: 'username',
                     type: DType.string,
-                    place: DType.query
+                    place: DType.query,
+                    description: "Username must be required"
                 }
             ],
             responses: [
@@ -45,6 +46,8 @@ const documentsSearchUser = new API({
 })
 ```
 
+![alt text](https://firebasestorage.googleapis.com/v0/b/mn-shop.appspot.com/o/example1.PNG?alt=media&token=aca378a2-480f-498f-9fe6-6bb3566cf94b "Visualize of bellow document instance")
+
 ### Example for multi method in document:
 ```js
 // example.js file
@@ -58,19 +61,13 @@ const operationGet = new Operation({
             name: 'token',
             type: DType.string,
             place: DType.body,
-            description: "Token user"
-        },
-        {
-            name: 'list',
-            type: [DType.string],
-            place: DType.body,
-            description: "List book"
+            description: "Token need to authenticate"
         },
         {
             name: 'userid',
             type: DType.string,
             place: DType.path,
-            description: "Id user"
+            description: "Only number"
         }
     ],
     responses: [
@@ -93,13 +90,8 @@ const operationPost = new Operation({
         {
             name: 'token',
             type: DType.string,
-            place: DType.body,
-            description: "Token user"
-        },
-        {
-            name: "list",
-            type: [DType.string],
-            place: DType.query
+            place: DType.header,
+            description: "Token need to authenticate"
         }
     ],
     responses: [
@@ -120,6 +112,8 @@ const documentsPublicUser = new API({
     operation: [operationGet, operationPost]
 })
 ```
+
+![alt text](https://firebasestorage.googleapis.com/v0/b/mn-shop.appspot.com/o/example2.PNG?alt=media&token=b5fca552-d3cd-4c43-97a6-5ebd5bc6eea7 "Visualize of bellow document instance")
 
 ### Export to use
 ```js
