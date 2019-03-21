@@ -46,7 +46,7 @@ const documentsSearchUser = new API({
 })
 ```
 
-![alt text](https://firebasestorage.googleapis.com/v0/b/mn-shop.appspot.com/o/example1.PNG?alt=media&token=aca378a2-480f-498f-9fe6-6bb3566cf94b "Visualize of bellow document instance")
+![alt text](https://firebasestorage.googleapis.com/v0/b/mn-shop.appspot.com/o/search.PNG?alt=media&token=2eb6bbbf-2686-4dac-b9e4-7121099f53f9 "Visualize of bellow document instance")
 
 ### Example for multi method in document:
 ```js
@@ -113,7 +113,11 @@ const documentsPublicUser = new API({
 })
 ```
 
-![alt text](https://firebasestorage.googleapis.com/v0/b/mn-shop.appspot.com/o/example2.PNG?alt=media&token=b5fca552-d3cd-4c43-97a6-5ebd5bc6eea7 "Visualize of bellow document instance")
+
+![alt text](https://firebasestorage.googleapis.com/v0/b/mn-shop.appspot.com/o/get.PNG?alt=media&token=05a682f9-f5f4-49fb-bb55-f9c29c2f7866 "Visualize of bellow document instance")
+
+![alt text](https://firebasestorage.googleapis.com/v0/b/mn-shop.appspot.com/o/post.PNG?alt=media&token=04e4203d-4f21-40cc-b54f-b8c94ff2540a "Visualize of bellow document instance")
+
 
 ### Export to use
 ```js
@@ -137,6 +141,59 @@ module.exports = new Document({
 ### Use with swagger-ui-express
 ```js
 const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./documents');
+const swaggerDocument = require('./document');
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 ```
+
+### Some example for request (schema), params (type):
+
+```js
+// Data response
+const data = {
+    status: true,
+    message: "Success",
+    list: [
+        {
+            username: "devteam",
+            isAdmin: "true",
+            age: 25
+        }
+    ]
+}
+// Convert to schema
+new Response({
+    schema: {
+        status: DType.boolean,
+        message: DType.string,
+        list: [
+            {
+                username: DType.string,
+                isAdmin: DType.boolean,
+                age: DType.number
+            }
+        ]
+    }
+})
+```
+
+![alt text](https://firebasestorage.googleapis.com/v0/b/mn-shop.appspot.com/o/chema2.PNG?alt=media&token=6f0dfc42-23f4-4ecb-bdc1-b56cc0b1e2c4 "Visualize of bellow document instance")
+
+
+```js
+const param = [
+        {
+            name: 'list',
+            type: {
+                userid: DType.number,
+                list: [{
+                    productId: DType.number,
+                    price: DType.number
+                }]
+            },
+            place: DType.body,
+            description: "User's orders"
+        }
+    ]
+```
+
+![alt text](https://firebasestorage.googleapis.com/v0/b/mn-shop.appspot.com/o/type2.PNG?alt=media&token=37e8fcd1-4375-42be-8f28-7029885d3c01 "Visualize of bellow document instance")
