@@ -130,6 +130,10 @@ class DType {
     static get delete() {
         return 'delete'
     }
+
+    static get file() {
+        return 'file'
+    }
 }
 
 class Parameter {
@@ -210,6 +214,9 @@ class Parameter {
         if (this.format) {
             param = Object.assign(param, { "format": this.format })
         }
+        if (this.consume) {
+            param = Object.assign(param, { "consumes": this.format })
+        }
         if (this.schema) {
             param = Object.assign(param, { "schema": this.schema })
         }
@@ -249,6 +256,7 @@ class FormData extends Parameter {
         super(name, type)
         this.in = 'formData'
         this.description = description
+        this.consume = 'multipart/form-data'
         return this.toJSON()
     }
 }
