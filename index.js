@@ -5,6 +5,9 @@ function typeOf(something) {
 
 function convertSchemaToJSON(schema) {
     const typeSchema = typeOf(schema)
+    if (schema == 'null') {
+        return { "type": 'string', "nullable": true }
+    }
     if (typeSchema == 'object') {
         return convertObjectToJSON(schema)
     }
@@ -134,6 +137,10 @@ class DType {
     static get file() {
         return 'file'
     }
+
+    static get null() {
+        return 'null'
+    }
 }
 
 class Parameter {
@@ -204,6 +211,7 @@ class Parameter {
      */
     toJSON() {
         if (!this.name) throw new Error('"name" is required to create an parameter!')
+
         let param = {
             "name": this.name,
             ...this.type,
@@ -219,6 +227,9 @@ class Parameter {
         }
         if (this.schema) {
             param = Object.assign(param, { "schema": this.schema })
+        }
+        if (this.type == 'null') {
+            param = Object.assign(param, { "nullable": true, "type": "string" })
         }
         return param
     }
@@ -330,18 +341,46 @@ function convertBodyFromArray(arrayBody) {
     }
 }
 
+function convertParams(params) {
+    const arrParams = []
+    const arrayBody = []
+    if (!params && typeOf(params) !== 'array') {
+        throw new Error('Parameters is required and must be array!')
+    }
+    for (const param of params) {
+        const { name = '', description = '', place = '', type = '' } = param
+        if (place == '') throw new Error('Place is required to create parameter')
+        if (place == DType.body) {
+            arrayBody.push({ name, type, description })
+        } else {
+            if (!ParamsType[place]) {
+                throw new Error('place must be in one of body, header, path, query, formData')
+            }
+            const newParam = new ParamsType[place]({ name, type, description })
+            arrParams.push(newParam)
+        }
+    }
+    if (arrayBody.length) {
+        const body = convertBodyFromArray(arrayBody)
+        arrParams.push(body)
+    }
+    return arrParams
+}
+
 class Operation {
     constructor({
         method,
         tags,
         summary = "",
         parameters,
-        responses
+        responses,
+        auth = true
     }) {
+        this.auth = auth
         this.tag = tags
         this.action = method || 'get'
         this.sum = summary
-        this.params = this.convertParams(parameters)
+        this.params = parameters
         this.responses = Object.assign({}, ...responses)
 
         return {
@@ -362,37 +401,13 @@ class Operation {
                     "403": {
                         "description": "Unauthenticated"
                     }
-                }
+                },
+                "auth": this.auth,
             }
         }
-    }
-
-    convertParams(params) {
-        const arrParams = []
-        const arrayBody = []
-        if (!params && typeOf(params) !== 'array') {
-            throw new Error('Parameters is required and must be array!')
-        }
-        for (const param of params) {
-            const { name = '', description = '', place = '', type = '' } = param
-            if (place == '') throw new Error('Place is required to create parameter')
-            if (place == DType.body) {
-                arrayBody.push({ name, type, description })
-            } else {
-                if (!ParamsType[place]) {
-                    throw new Error('place must be in one of body, header, path, query, formData')
-                }
-                const newParam = new ParamsType[place]({ name, type, description })
-                arrParams.push(newParam)
-            }
-        }
-        if (arrayBody.length) {
-            const body = convertBodyFromArray(arrayBody)
-            arrParams.push(body)
-        }
-        return arrParams
     }
 }
+
 class API {
     constructor({ path, operation }) {
         if (!path) throw new Error("path is required to create new API!")
@@ -405,8 +420,23 @@ class API {
         }
     }
 }
+
 class Document {
-    constructor({ version = "1.0.0", description = "", title = "", paths }) {
+    constructor({ version = "1.0.0", description = "", title = "", paths, defaultParams = [] }) {
+        for (let path of paths) {
+            if (Object.keys(path).length == 0) continue
+            const url = this.getUrl(path)
+            const methods = this.getMethods(path, url)
+            for (let method of methods) {
+                const methodObj = path[url][method]
+                let params = methodObj.parameters
+                if (methodObj.auth) {
+                    params = [...params, ...defaultParams]
+                }
+                methodObj.parameters = convertParams(params)
+                delete methodObj.auth
+            }
+        }
         return {
             "swagger": "2.0",
             "info": {
@@ -417,6 +447,12 @@ class Document {
             "schemes": ["http", "https"],
             "paths": Object.assign({}, ...paths)
         }
+    }
+    getUrl(path) {
+        return Object.keys(path)[0]
+    }
+    getMethods(path, url) {
+        return Object.keys(path[url])
     }
 }
 
