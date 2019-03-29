@@ -374,13 +374,15 @@ class Operation {
         summary = "",
         parameters,
         responses,
-        auth = true
+        defaultParams = true,
+        optionParams = []
     }) {
-        this.auth = auth
+        this.defaultParams = defaultParams
         this.tag = tags
         this.action = method || 'get'
         this.sum = summary
         this.params = parameters
+        this.optionParams = optionParams
         this.responses = Object.assign({}, ...responses)
 
         return {
@@ -402,7 +404,8 @@ class Operation {
                         "description": "Unauthenticated"
                     }
                 },
-                "auth": this.auth,
+                "defaultParams": this.defaultParams,
+                "optionParams": this.optionParams
             }
         }
     }
@@ -422,7 +425,7 @@ class API {
 }
 
 class Document {
-    constructor({ version = "1.0.0", description = "", title = "", paths, defaultParams = [] }) {
+    constructor({ version = "1.0.0", description = "", title = "", paths, defaultParams = [], optionParams = [] }) {
         for (let path of paths) {
             if (Object.keys(path).length == 0) continue
             const url = this.getUrl(path)
@@ -430,8 +433,15 @@ class Document {
             for (let method of methods) {
                 const methodObj = path[url][method]
                 let params = methodObj.parameters
-                if (methodObj.auth) {
+                if (methodObj.defaultParams) {
                     params = [...params, ...defaultParams]
+                }
+                if (methodObj.optionParams && methodObj.optionParams.length) {
+                    for (let opt of methodObj.optionParams) {
+                        const option = optionParams.find(optionParam => optionParam.name == opt)
+                        if (option == undefined) throw new Error(`Cant not find option params ${opt}`)
+                        params = [...params, option]
+                    }
                 }
                 methodObj.parameters = convertParams(params)
                 delete methodObj.auth
@@ -455,6 +465,7 @@ class Document {
         return Object.keys(path[url])
     }
 }
+
 
 module.exports = {
     DType,
